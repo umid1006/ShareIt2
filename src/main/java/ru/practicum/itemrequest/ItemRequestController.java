@@ -63,10 +63,10 @@ public class ItemRequestController {
                                                        @RequestParam(defaultValue = "10") int size,
                                                        @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("Received GET request to retrieve all ItemRequests pageable for user {}", userId);
-        try{
+        try {
             List<ItemRequestDto> requestDtos = itemRequestMapper.toDtoList(itemRequestService.getAll(from, size, userId));
             return ResponseEntity.ok(requestDtos);
-        }catch (NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }

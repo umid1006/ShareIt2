@@ -32,14 +32,15 @@ public class BookingController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
     @PatchMapping("/{bookingId}")
     public ResponseEntity<BookingDto> updateBooking(@PathVariable Long bookingId,
                                                     @RequestBody BookingDto bookingDto) {
         log.info("PATCH /bookings/{}: Update booking {}", bookingId, bookingDto);
-        try{
+        try {
             BookingDto updatedBooking = bookingService.updateBooking(bookingId, bookingDto);
             return ResponseEntity.ok(updatedBooking);
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             log.error("Error updating booking: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (ValidateException e) {
@@ -47,6 +48,7 @@ public class BookingController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
     @GetMapping("/{bookingId}")
     public ResponseEntity<BookingDto> getBookingById(@PathVariable Long bookingId) {
         log.info("GET /bookings/{}: Get booking {}", bookingId, bookingId);
@@ -60,24 +62,29 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BookingDto>> getAllBookingsByBooker(@RequestHeader(Constants.USER_ID_HEADER) Long bookerId) {
-        log.info("GET /bookings: Get all bookings for booker {}", bookerId);
+    public ResponseEntity<List<BookingDto>> getAllBookingsByBooker(
+            @RequestHeader(Constants.USER_ID_HEADER) Long bookerId,
+            @RequestParam(name = "state", required = false, defaultValue = "ALL") String state) {
+        log.info("GET /bookings?state={}: Get all bookings for booker {}", state, bookerId);
         try {
-            List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId);
+            List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId, state);
             return ResponseEntity.ok(bookings);
         } catch (NotFoundException e) {
+            log.error("Error getting bookings for booker: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<List<BookingDto>> getAllBookingsByItemOwner(@RequestHeader(Constants.USER_ID_HEADER) Long ownerId) {
-        log.info("GET /bookings/owner: Get all bookings for item's owner {}", ownerId);
-
+    public ResponseEntity<List<BookingDto>> getAllBookingsByItemOwner(
+            @RequestHeader(Constants.USER_ID_HEADER) Long ownerId,
+            @RequestParam(name = "state", required = false, defaultValue = "ALL") String state) {
+        log.info("GET /bookings/owner?state={}: Get all bookings for item's owner {}", state, ownerId);
         try {
-            List<BookingDto> bookings = bookingService.getAllBookingsByItemOwner(ownerId);
+            List<BookingDto> bookings = bookingService.getAllBookingsByItemOwner(ownerId, state);
             return ResponseEntity.ok(bookings);
         } catch (NotFoundException e) {
+            log.error("Error getting bookings for item owner: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -87,17 +94,18 @@ public class BookingController {
                                                      @PathVariable Long bookingId,
                                                      @RequestParam Boolean approved) {
         log.info("PATCH /bookings/{}/approve?approved={}: Approve booking {} by user {}", bookingId, approved, bookingId, ownerId);
-        try{
+        try {
             BookingDto updatedBooking = bookingService.approveBooking(bookingId, ownerId, approved);
             return ResponseEntity.ok(updatedBooking);
         } catch (NotFoundException e) {
             log.error("Error approving booking: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (ValidateException e){
+        } catch (ValidateException e) {
             log.error("Error approving booking: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
     @GetMapping("/all") //for testing
     public ResponseEntity<List<BookingDto>> getAllBookings() {
         log.info("GET /bookings/all: Get all bookings");

@@ -11,6 +11,7 @@ import ru.practicum.item.ItemRepository;
 import ru.practicum.user.User;
 import ru.practicum.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,6 +119,7 @@ public class BookingServiceImpl implements BookingService {
         // Return the aggregated list of BookingDto objects
         return bookingDtos;
     }
+
     @Override
     @Transactional
     public BookingDto approveBooking(Long bookingId, Long ownerId, Boolean approved) {
@@ -140,10 +142,79 @@ public class BookingServiceImpl implements BookingService {
         Booking updatedBooking = bookingRepository.save(booking); // Save the updated booking
         return bookingMapper.mapToDto(updatedBooking);
     }
+
     @Override
     public List<BookingDto> getAllBookings() {
         return bookingRepository.findAll().stream()
                 .map(bookingMapper::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingDto> getAllBookingsByBooker(Long bookerId, String state) {
+        BookingState bookingState = BookingState.valueOf(state.toUpperCase());
+        List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
+
+        switch (bookingState) {
+            case CURRENT:
+                bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, now, now);
+                break;
+            case PAST:
+                bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(bookerId, now);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(bookerId, now);
+                break;
+            case WAITING:
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, Booking.BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, Booking.BookingStatus.REJECTED);
+                break;
+            default:
+                bookings = bookingRepository.findByBookerIdOrderByStartDesc(bookerId);
+                break;
+        }
+
+        return bookings.stream()
+                .map(bookingMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingDto> getAllBookingsByItemOwner(Long ownerId, String state) {
+        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        List<BookingDto> bookingDtos = new java.util.ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Item item : items) {
+            List<Booking> itemBookings;
+
+            switch (state != null ? state.toUpperCase() : "ALL") {
+                case "CURRENT":
+                    itemBookings = bookingRepository.findByItemIdAndStartBeforeAndEndAfterOrderByStartDesc(item.getId(), now, now);
+                    break;
+                case "PAST":
+                    itemBookings = bookingRepository.findByItemIdAndEndBeforeOrderByStartDesc(item.getId(), now);
+                    break;
+                case "FUTURE":
+                    itemBookings = bookingRepository.findByItemIdAndStartAfterOrderByStartDesc(item.getId(), now);
+                    break;
+                case "WAITING":
+                    itemBookings = bookingRepository.findByItemIdAndStatusOrderByStartDesc(item.getId(), Booking.BookingStatus.WAITING);
+                    break;
+                case "REJECTED":
+                    itemBookings = bookingRepository.findByItemIdAndStatusOrderByStartDesc(item.getId(), Booking.BookingStatus.REJECTED);
+                    break;
+                default:
+                    itemBookings = bookingRepository.findByItemIdOrderByStartDesc(item.getId());
+                    break;
+            }
+            bookingDtos.addAll(itemBookings.stream()
+                    .map(bookingMapper::mapToDto)
+                    .collect(Collectors.toList()));
+        }
+        return bookingDtos;
     }
 }

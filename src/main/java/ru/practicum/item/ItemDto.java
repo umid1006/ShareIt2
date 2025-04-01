@@ -2,8 +2,8 @@
 package ru.practicum.item;
 
 import lombok.*;
+import ru.practicum.booking.BookingDto;
 
-@Value
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,4 +15,6 @@ public class ItemDto {
     Long ownerId; // Keep this for the controller's input
     Boolean available;
     Long requestId; // Keep this
+    BookingDto lastBooking; // Добавляем поле для последнего бронирования
+    BookingDto nextBooking; // Добавляем поле для следующего бронирования
 }

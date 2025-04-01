@@ -11,8 +11,11 @@ import java.util.List;
 public interface ItemRequestMapper {
 
     ItemRequestDto toDto(ItemRequest itemRequest);
-    @Mapping(target = "requester", ignore = true) // Ignore requester during mapping TO entity
+
+    @Mapping(target = "requester", ignore = true)
+        // Ignore requester during mapping TO entity
     ItemRequest toEntity(ItemRequestDto itemRequestDto);
+
     List<ItemRequestDto> toDtoList(List<ItemRequest> itemRequests);
 
 }

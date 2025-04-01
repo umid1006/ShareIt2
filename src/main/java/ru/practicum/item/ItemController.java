@@ -1,6 +1,7 @@
 // item/ItemController.java (Changes Needed)
 package ru.practicum.item;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class ItemController {
         try {
             ItemDto addedItem = itemService.add(itemDto, ownerId);
             return ResponseEntity.status(HttpStatus.CREATED).body(addedItem);
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -35,9 +36,9 @@ public class ItemController {
                                               @PathVariable Long itemId,
                                               @RequestBody ItemDto itemDto) {
         log.info("PATCH /items/{}: Update item {} by user {}", itemId, itemDto, ownerId);
-        try{
+        try {
             return ResponseEntity.ok(itemService.updateInStorage(itemDto, ownerId, itemId));
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -45,19 +46,19 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
         log.info("GET /items/{}: Get item {}", itemId, itemId);
-        try{
+        try {
             return ResponseEntity.ok(itemService.getItemById(itemId));
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     @GetMapping
-    public  ResponseEntity<List<ItemDto>> getAllItems(@RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+    public ResponseEntity<List<ItemDto>> getAllItems(@RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("GET /items: Get all items for user {}", userId);
-        try{
+        try {
             return ResponseEntity.ok(itemService.getAllItems(userId));
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -67,8 +68,23 @@ public class ItemController {
         log.info("GET /items/search?text={}: Search items by text '{}'", text, text);
         try {
             return ResponseEntity.ok(itemService.searchItemsByText(text));
-        }catch (NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> addComment(
+            @RequestHeader(Constants.USER_ID_HEADER) Long userId,
+            @PathVariable Long itemId,
+            @Valid @RequestBody CommentDto commentDto) {
+        log.info("POST /items/{}/comment: Add comment by user {}", itemId, userId);
+        try {
+            CommentDto createdComment = itemService.addComment(itemId, userId, commentDto);
+            return ResponseEntity.status(HttpStatus.OK).body(createdComment);
+        } catch (NotFoundException | IllegalStateException e) {
+            log.error("Error adding comment: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         }
     }
 }

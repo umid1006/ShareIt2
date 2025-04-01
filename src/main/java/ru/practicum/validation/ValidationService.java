@@ -65,6 +65,7 @@ public class ValidationService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID = " + userId + " не найден."));
     }
+
     public Item checkExistItemInDB(Long itemId) {
 
         return itemRepository.findById(itemId)
@@ -77,6 +78,7 @@ public class ValidationService {
             throw new ConflictException("Вещь с ID = " + itemId + " уже существует.");
         }
     }
+
     public void validateItemFields(Item item) {
         if (item.getName() == null || item.getName().isBlank()) {
             throw new ValidateException("Название вещи не может быть пустым.");
@@ -104,6 +106,7 @@ public class ValidationService {
         }
         return result;
     }
+
     public boolean isOwnerItem(Item item, Long ownerId) {
         if (item == null || ownerId == null) {
             throw new ValidateException("Вещь и (или) ID хозяина вещи равны null.");

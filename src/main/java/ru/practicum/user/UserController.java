@@ -39,6 +39,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUserDto);
 
     }
+
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> get(@PathVariable Long userId) {
         log.info("Received GET request to retrieve user ID {}", userId);

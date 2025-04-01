@@ -43,7 +43,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequest> getAll(int from, int size, Long userId) {
         validationService.checkExistUserInDB(userId);
-        return itemRequestRepository.findAllPageable(userId, PageRequest.of(from,size));
+        return itemRequestRepository.findAllPageable(userId, PageRequest.of(from, size));
 
     }
 }

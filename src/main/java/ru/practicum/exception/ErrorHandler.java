@@ -31,9 +31,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException e){
+    public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException e) {
         log.error("DuplicateEmailException: {}", e.getMessage());
-        return  ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("duplicate_email", e.getMessage()));
     }
 
@@ -48,6 +48,7 @@ public class ErrorHandler {
         });
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("Exception: {}", e.getMessage(), e); // Log the error WITH stack trace

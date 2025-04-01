@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.booking.Booking;
+import ru.practicum.booking.BookingMapper;
+import ru.practicum.booking.BookingRepository;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidateException;
 import ru.practicum.itemrequest.ItemRequest;
@@ -13,6 +16,7 @@ import ru.practicum.user.User;
 import ru.practicum.user.UserRepository;
 import ru.practicum.validation.ValidationService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +32,10 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRequestRepository itemRequestRepository;
     private final ItemMapper mapper;
     private final ValidationService validationService;
+    private final BookingRepository bookingRepository; // Добавляем репозиторий бронирований
+    private final BookingMapper bookingMapper;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     @Override
     @Transactional // Add this!  Important for write operations
@@ -104,6 +112,7 @@ public class ItemServiceImpl implements ItemService {
     public Boolean isExcludeItemById(Long itemId) {
         return itemRepository.existsById(itemId);
     }
+
     @Override
     @Transactional // Add this!
     public void removeItemById(Long itemId) {
@@ -124,5 +133,56 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.search(text).stream()
                 .map(mapper::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ItemDto> getItemsByOwner(Long ownerId) {
+        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        LocalDateTime now = LocalDateTime.now();
+
+        return items.stream()
+                .map(item -> {
+                    ItemDto itemDto = mapper.mapToDto(item);
+
+                    Booking lastBooking = bookingRepository.findByItemIdAndEndBeforeOrderByEndDesc(item.getId(), now)
+                            .stream()
+                            .findFirst()
+                            .orElse(null);
+                    itemDto.setLastBooking(lastBooking != null ? bookingMapper.mapToDto(lastBooking) : null);
+
+                    Booking nextBooking = bookingRepository.findByItemIdAndStartAfterOrderByStartAsc(item.getId(), now)
+                            .stream()
+                            .findFirst()
+                            .orElse(null);
+                    itemDto.setNextBooking(nextBooking != null ? bookingMapper.mapToDto(nextBooking) : null);
+
+                    return itemDto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) {
+        // 1. Проверить, брал ли пользователь вещь в аренду
+        boolean hasBooked = bookingRepository.existsByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
+        if (!hasBooked) {
+            throw new ValidateException("User has not booked this item.");
+        }
+
+        // 2. Найти вещь и пользователя
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found."));
+        var author = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Author not found"));
+
+        // 3. Создать и сохранить комментарий
+        Comment comment = commentMapper.mapToModel(commentDto, userId, itemId);
+        comment.setItem(item);
+        comment.setAuthor(author);
+        comment.setCreated(LocalDateTime.now());
+        Comment savedComment = commentRepository.save(comment);
+
+        return commentMapper.mapToDto(savedComment);
     }
 }
