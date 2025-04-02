@@ -2,13 +2,19 @@
 package ru.practicum.booking;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.exception.ItemNotFoundException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidateException;
 import ru.practicum.item.Item;
+import ru.practicum.item.ItemDto;
 import ru.practicum.item.ItemRepository;
 import ru.practicum.user.User;
+import ru.practicum.user.UserDto;
 import ru.practicum.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -28,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto createBooking(BookingDto bookingDto, Long userId) {
+        final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
         // Validate input
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             throw new ValidateException("Start and end dates must be provided.");
@@ -37,9 +44,9 @@ public class BookingServiceImpl implements BookingService {
         }
         // Check item exists and is available
         Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new NotFoundException("Item with id " + bookingDto.getItemId() + " not found"));
+                .orElseThrow(() -> new ItemNotFoundException("Item with id " + bookingDto.getItemId() + " not found"));
         if (!item.getAvailable()) {
-            throw new ValidateException("Item with id " + bookingDto.getItemId() + " is not available.");
+            throw new RuntimeException("Item with id " + bookingDto.getItemId() + " is not available.");
         }
 
         // Check user exists
@@ -53,7 +60,19 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(Booking.BookingStatus.WAITING); // Initial status
 
         Booking savedBooking = bookingRepository.save(booking);
-        return bookingMapper.mapToDto(savedBooking);
+        log.info("Saved Booking entity: {}", savedBooking); // Log the entity
+
+        BookingDto dtoToReturn = bookingMapper.mapToDto(savedBooking);
+
+        // Populate UserDto and ItemDto
+        UserDto userDto = bookingMapper.userToUserDto(booker);
+        ItemDto itemDto = bookingMapper.itemToItemDto(item);
+        dtoToReturn.setBooker(userDto);
+        dtoToReturn.setItem(itemDto);
+
+        log.info("Returning BookingDto: {}", dtoToReturn);
+
+        return dtoToReturn;
     }
 
     @Override

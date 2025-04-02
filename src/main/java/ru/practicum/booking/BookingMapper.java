@@ -4,7 +4,9 @@ package ru.practicum.booking;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.item.Item;
+import ru.practicum.item.ItemDto;
 import ru.practicum.user.User;
+import ru.practicum.user.UserDto;
 
 @Mapper(componentModel = "spring")
 public interface BookingMapper {
@@ -15,6 +17,8 @@ public interface BookingMapper {
 
     @Mapping(target = "itemId", source = "item.id")
     @Mapping(target = "bookerId", source = "booker.id")
+    @Mapping(target = "booker", source = "booker")
+    @Mapping(target = "item", source = "item")
     BookingDto mapToDto(Booking booking);
 
     @org.mapstruct.Named("mapItemIdToItem")
@@ -36,4 +40,8 @@ public interface BookingMapper {
         user.setId(bookerId);
         return user;
     }
+
+    UserDto userToUserDto(User user);
+
+    ItemDto itemToItemDto(Item item);
 }

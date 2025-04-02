@@ -9,8 +9,6 @@ import ru.practicum.user.User;
 @Mapper(componentModel = "spring")
 public interface ItemMapper {
 
-    // REMOVE THIS:  ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
-
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToItemRequest")
     @Mapping(target = "owner", source = "ownerId", qualifiedByName = "mapOwnerIdToUser")
     Item mapToModel(ItemDto itemDto);
