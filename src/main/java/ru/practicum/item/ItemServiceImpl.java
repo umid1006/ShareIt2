@@ -148,13 +148,13 @@ public class ItemServiceImpl implements ItemService {
                             .stream()
                             .findFirst()
                             .orElse(null);
-                    itemDto.setLastBooking(lastBooking != null ? bookingMapper.mapToDto(lastBooking) : null);
+                    itemDto.setLastBooking(lastBooking != null ? bookingMapper.toDto(lastBooking) : null);
 
                     Booking nextBooking = bookingRepository.findByItemIdAndStartAfterOrderByStartAsc(item.getId(), now)
                             .stream()
                             .findFirst()
                             .orElse(null);
-                    itemDto.setNextBooking(nextBooking != null ? bookingMapper.mapToDto(nextBooking) : null);
+                    itemDto.setNextBooking(nextBooking != null ? bookingMapper.toDto(nextBooking) : null);
 
                     return itemDto;
                 })

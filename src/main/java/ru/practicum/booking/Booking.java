@@ -41,12 +41,4 @@ public class Booking {
     @Enumerated(EnumType.STRING) // Store enum as string in the database
     @Column(name = "status", nullable = false)
     private BookingStatus status;
-
-    // Enum for booking status (nested within Booking class)
-    public enum BookingStatus {
-        WAITING,
-        APPROVED,
-        REJECTED,
-        CANCELED
     }
-}

@@ -1,24 +1,12 @@
-// booking/BookingService.java
 package ru.practicum.booking;
 
 import java.util.List;
 
 public interface BookingService {
-    BookingDto createBooking(BookingDto bookingDto, Long userId);
-
-    BookingDto updateBooking(Long bookingId, BookingDto bookingDto);
-
-    BookingDto getBookingById(Long bookingId);
-
-    List<BookingDto> getAllBookingsByBooker(Long bookerId);
-
-    List<BookingDto> getAllBookingsByItemOwner(Long ownerId); // New method
-
-    BookingDto approveBooking(Long bookingId, Long ownerId, Boolean approved); // New Method
-
-    List<BookingDto> getAllBookings(); //for testing
-
-    List<BookingDto> getAllBookingsByBooker(Long bookerId, String state);
-
-    List<BookingDto> getAllBookingsByItemOwner(Long ownerId, String state);
+    BookingDto createBooking(BookingDto bookingRequestDto, Long bookerId);
+    BookingDto updateBooking(Long bookingId, Long userId, boolean approved);
+    BookingDto cancelBooking(Long bookingId, Long userId); // New method
+    BookingDto getBooking(Long bookingId, Long userId);
+    List<BookingDto> getBookings(Long userId, String state);
+    List<BookingDto> getOwnerBookings(Long ownerId, String state);
 }
