@@ -2,6 +2,7 @@ package ru.practicum.booking;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.exception.*;
@@ -10,10 +11,10 @@ import ru.practicum.item.ItemRepository;
 import ru.practicum.user.User;
 import ru.practicum.user.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
@@ -26,26 +27,34 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto createBooking(BookingDto bookingDto, Long bookerId) {
-        User booker = userRepository.findById(bookerId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        log.info("Creating booking for item {} by user {}", bookingDto.getItemId(), bookerId);
 
-        Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new NotFoundException("Item not found"));
-
-        // Check item availability - THIS IS THE KEY CHANGE
-        if (!item.getAvailable()) {
-            throw new ValidateException("Item is not available for booking"); // Changed to ValidateException
+        // 1. Find user - throws NotFoundException (404)
+        User booker;
+        try {
+            booker = userRepository.findById(bookerId)
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + bookerId));
+        } catch (RuntimeException e) {
+            log.error("User lookup failed", e);
+            throw new RuntimeException("User lookup failed", e); // Will result in 500
         }
 
-        // Rest of your validation checks...
+        // 2. Find item - throws ItemNotFoundException (404)
+        Item item = itemRepository.findById(bookingDto.getItemId())
+                .orElseThrow(() -> {
+                    log.error("Item not found with id: {}", bookingDto.getItemId());
+                    return new ItemNotFoundException("Item not found with id: " + bookingDto.getItemId());
+                });
+
+        // 3. Business validations (throw other exceptions)
+        if (!item.getAvailable()) {
+            throw new ValidateException("Item is not available for booking");
+        }
         if (item.getOwner().getId().equals(bookerId)) {
             throw new ConflictException("Owner cannot book their own item");
         }
 
-        if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
-            throw new ValidateException("End date must be after start date");
-        }
-
+        // 4. Create and save booking
         Booking booking = bookingMapper.toEntity(bookingDto);
         booking.setItem(item);
         booking.setBooker(booker);
