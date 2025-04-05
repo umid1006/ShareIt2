@@ -36,6 +36,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final ItemMapper itemMapper;
 
     @Override
     @Transactional // Add this!  Important for write operations
@@ -102,10 +103,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(Long itemId) {
-        // Return DTO, not entity
-        return itemRepository.findById(itemId)
-                .map(mapper::mapToDto)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with ID: " + itemId));
+
+        List<Comment> comments = commentRepository.findByItemId(itemId);
+        return itemMapper.mapToDtoWithComments(item, comments, commentMapper);
     }
 
     @Override

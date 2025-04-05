@@ -1,12 +1,15 @@
-// ItemMapper.java (Corrected - No INSTANCE field)
 package ru.practicum.item;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import ru.practicum.itemrequest.ItemRequest;
 import ru.practicum.user.User;
 
-@Mapper(componentModel = "spring")
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "spring", uses = CommentMapper.class) // Add uses parameter
 public interface ItemMapper {
 
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToItemRequest")
@@ -15,14 +18,24 @@ public interface ItemMapper {
 
     @Mapping(target = "requestId", source = "request", qualifiedByName = "mapItemRequestToRequestId")
     @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "comments", ignore = true) // We'll handle comments separately
     ItemDto mapToDto(Item item);
 
-    @org.mapstruct.Named("mapItemRequestToRequestId")
+    @Named("mapItemRequestToRequestId")
     default Long mapItemRequestToRequestId(ItemRequest request) {
         return request != null ? request.getId() : null;
     }
 
-    @org.mapstruct.Named("mapRequestIdToItemRequest")
+    // Add this method to map with comments
+    default ItemDto mapToDtoWithComments(Item item, List<Comment> comments, CommentMapper commentMapper) {
+        ItemDto dto = mapToDto(item);
+        dto.setComments(comments.stream()
+                .map(commentMapper::mapToDto)
+                .collect(Collectors.toList()));
+        return dto;
+    }
+
+    @Named("mapRequestIdToItemRequest")
     default ItemRequest mapRequestIdToItemRequest(Long requestId) {
         if (requestId == null) {
             return null;
@@ -32,7 +45,7 @@ public interface ItemMapper {
         return itemRequest;
     }
 
-    @org.mapstruct.Named("mapOwnerIdToUser")
+    @Named("mapOwnerIdToUser")
     default User mapOwnerIdToUser(Long ownerId) {
         if (ownerId == null) {
             return null;

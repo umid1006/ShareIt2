@@ -66,21 +66,26 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto updateBooking(Long bookingId, Long userId, boolean approved) {
+        log.info("Updating booking {} with approved={} by user {}", bookingId, approved, userId);
+
+        // 1. Find booking
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
 
-        // Validate update
+        // 2. Verify user is the item owner
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidateException("Only item owner can approve/reject booking");
-        }
-        if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new ValidateException("Only WAITING bookings can be modified");
+            throw new ForbiddenException("Only item owner can approve/reject booking");
         }
 
+        // 3. Check booking status
+        if (booking.getStatus() != BookingStatus.WAITING) {
+            throw new ValidateException("Booking status cannot be changed");
+        }
+
+        // 4. Update status
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         Booking updatedBooking = bookingRepository.save(booking);
+
         return bookingMapper.toDto(updatedBooking);
     }
 

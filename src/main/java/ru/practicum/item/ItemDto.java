@@ -4,6 +4,9 @@ package ru.practicum.item;
 import lombok.*;
 import ru.practicum.booking.BookingDto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -17,4 +20,6 @@ public class ItemDto {
     Long requestId; // Keep this
     BookingDto lastBooking; // Добавляем поле для последнего бронирования
     BookingDto nextBooking; // Добавляем поле для следующего бронирования
+    @Builder.Default
+    private List<CommentDto> comments = new ArrayList<>(); // Initialize empty list
 }
