@@ -20,12 +20,6 @@ public interface BookingMapper {
     @Mapping(target = "status", expression = "java(ru.practicum.booking.BookingStatus.WAITING)")
     Booking toEntity(BookingDto bookingDto);
 
-    @Mapping(target = "itemId", source = "item.id")
-    @Mapping(target = "bookerId", source = "booker.id")
-    @Mapping(target = "item", source = "booking.item")
-    @Mapping(target = "booker", source = "booking.booker")
-    BookingDto toDtoWithDetails(Booking booking);
-
     // Helper methods for ID conversion
     @Named("idToItem")
     default Item idToItem(Long itemId) {

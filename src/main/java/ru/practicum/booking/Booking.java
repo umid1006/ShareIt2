@@ -41,4 +41,4 @@ public class Booking {
     @Enumerated(EnumType.STRING) // Store enum as string in the database
     @Column(name = "status", nullable = false)
     private BookingStatus status;
-    }
+}

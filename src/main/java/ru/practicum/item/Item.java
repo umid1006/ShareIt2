@@ -2,6 +2,7 @@
 package ru.practicum.item;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import ru.practicum.itemrequest.ItemRequest;
 import ru.practicum.user.User;
@@ -21,9 +22,11 @@ public class Item {
     private Long id;
 
     @Column(name = "name", nullable = false)
+    @Size(max = 255)
     private String name;
 
     @Column(name = "description")
+    @Size(max = 255)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

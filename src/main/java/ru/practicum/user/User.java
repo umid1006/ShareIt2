@@ -2,6 +2,7 @@
 package ru.practicum.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter  // Use Lombok for getters
@@ -19,8 +20,10 @@ public class User {
     private Long id;
 
     @Column(name = "name")  // Maps the field to a database column
+    @Size(max = 255)
     private String name;
 
     @Column(name = "email", nullable = false, unique = true)  // Email should be unique
+    @Size(max = 255)
     private String email;
 }

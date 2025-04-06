@@ -18,7 +18,8 @@ public interface ItemMapper {
 
     @Mapping(target = "requestId", source = "request", qualifiedByName = "mapItemRequestToRequestId")
     @Mapping(target = "ownerId", source = "owner.id")
-    @Mapping(target = "comments", ignore = true) // We'll handle comments separately
+    @Mapping(target = "comments", ignore = true)
+        // We'll handle comments separately
     ItemDto mapToDto(Item item);
 
     @Named("mapItemRequestToRequestId")

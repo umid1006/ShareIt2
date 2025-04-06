@@ -14,7 +14,6 @@ import ru.practicum.user.UserRepository;
 import java.util.Optional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor // Use Lombok for constructor injection
 public class ValidationService {
 

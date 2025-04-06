@@ -21,7 +21,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingDto> createBooking(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
-                                                            @RequestBody BookingDto bookingRequestDto) {
+                                                    @RequestBody BookingDto bookingRequestDto) {
         log.info("POST /bookings: Create booking {} by user {}", bookingRequestDto, userId);
         try {
             BookingDto createdBooking = bookingService.createBooking(bookingRequestDto, userId);
@@ -34,8 +34,8 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<BookingDto> updateBooking(@PathVariable Long bookingId,
-                                                            @RequestHeader(Constants.USER_ID_HEADER) Long userId,
-                                                            @RequestParam boolean approved) {
+                                                    @RequestHeader(Constants.USER_ID_HEADER) Long userId,
+                                                    @RequestParam boolean approved) {
         log.info("PATCH /bookings/{}: Update booking {}, approved={}", bookingId, bookingId, approved);
         try {
             BookingDto updatedBooking = bookingService.updateBooking(bookingId, userId, approved);
@@ -51,7 +51,7 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<BookingDto> getBooking(@PathVariable Long bookingId,
-                                                         @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+                                                 @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("GET /bookings/{}: Get booking {}", bookingId, bookingId);
         try {
             BookingDto booking = bookingService.getBooking(bookingId, userId);
