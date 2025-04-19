@@ -1,9 +1,9 @@
-// Item.java
 package ru.practicum.item;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.itemrequest.ItemRequest;
 import ru.practicum.user.User;
 
@@ -16,27 +16,27 @@ import ru.practicum.user.User;
 @Table(name = "items")
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false, length = 255)
     @Size(max = 255)
-    private String name;
+    String name;
 
-    @Column(name = "description")
+    @Column(length = 255)
     @Size(max = 255)
-    private String description;
+    String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    User owner;
 
-    @Column(name = "available")
-    private Boolean available;
+    @Column
+    Boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
-    private ItemRequest request;
+    ItemRequest request;
 }

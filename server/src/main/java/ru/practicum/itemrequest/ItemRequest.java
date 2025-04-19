@@ -5,9 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import ru.practicum.item.Item;
 import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "item_requests")
@@ -34,4 +37,7 @@ public class ItemRequest {
     @CreatedDate // Automatically sets the creation date
     @Column(name = "created_at", nullable = false, updatable = false) // Don't allow updates
     private LocalDateTime created;
+
+    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
+    private List<Item> items = new ArrayList<>();
 }

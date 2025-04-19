@@ -6,7 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.item.ItemRepository;
 import ru.practicum.user.User;
+import ru.practicum.user.UserRepository;
 import ru.practicum.validation.ValidationService;
 
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
 public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
     private final ValidationService validationService;
 
     @Override
