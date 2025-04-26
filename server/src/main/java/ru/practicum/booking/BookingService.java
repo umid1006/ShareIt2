@@ -1,5 +1,7 @@
 package ru.practicum.booking;
 
+import ru.practicum.dto.BookingDto;
+
 import java.util.List;
 
 public interface BookingService {

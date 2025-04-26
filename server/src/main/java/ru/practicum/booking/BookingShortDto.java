@@ -19,4 +19,12 @@ public class BookingShortDto {
     private LocalDateTime start;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime end;
+
+    // Добавленный конструктор для MapStruct
+    public BookingShortDto(Long id, Long bookerId) {
+        this.id = id;
+        this.bookerId = bookerId;
+        this.start = null;
+        this.end = null;
+    }
 }

@@ -20,6 +20,7 @@
     <modules>
         <module>server</module>
         <module>gateway</module>
+        <module>shareit-dto</module>
     </modules>
 
     <properties>

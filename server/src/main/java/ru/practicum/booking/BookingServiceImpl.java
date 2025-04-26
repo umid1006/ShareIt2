@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.dto.BookingDto;
+import ru.practicum.util.BookingStatus;
 import ru.practicum.exception.*;
 import ru.practicum.item.Item;
 import ru.practicum.item.ItemRepository;

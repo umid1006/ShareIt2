@@ -8,16 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.UserDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class UserController {
+public class UserControllerServer {
 
     private final UserService userService;
     private final UserMapper userMapper;
@@ -25,7 +26,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto userDto) {
         log.info("Received POST request to create User: {}", userDto);
-        // NO try-catch HERE! Let exceptions propagate.
         User user = userMapper.toUser(userDto);
         UserDto createdUserDto = userMapper.toUserDto(userService.saveUser(user));
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUserDto);

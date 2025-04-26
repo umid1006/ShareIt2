@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import ru.practicum.util.BookingStatus;
 import ru.practicum.item.Item;
 import ru.practicum.user.User;
 

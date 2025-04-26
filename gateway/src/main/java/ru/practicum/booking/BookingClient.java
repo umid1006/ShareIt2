@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import ru.practicum.dto.BookItemRequestDto;
-import ru.practicum.dto.BookingState;
+import ru.practicum.util.BookingState;
 import ru.practicum.client.BaseClient;
 
 @Slf4j
 @Service
 public class BookingClient extends BaseClient {
-    private static final String API_PREFIX = "/bookings";
+    private static final String API_PREFIX = "/gateway/bookings";
 
     @Autowired
     public BookingClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {

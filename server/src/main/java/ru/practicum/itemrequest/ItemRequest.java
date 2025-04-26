@@ -20,8 +20,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = {"id"}) // Use only ID for equals/hashCode
-@EntityListeners(AuditingEntityListener.class) // Enable auditing
+@EqualsAndHashCode
+@EntityListeners(AuditingEntityListener.class)
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,12 +32,26 @@ public class ItemRequest {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id", nullable = false)
+    @ToString.Exclude
     private User requester;
 
-    @CreatedDate // Automatically sets the creation date
-    @Column(name = "created_at", nullable = false, updatable = false) // Don't allow updates
-    private LocalDateTime created;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime created = LocalDateTime.now();
 
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
     private List<Item> items = new ArrayList<>();
+
+    public void addItem(Item item) {
+        items.add(item);
+        item.setRequest(this);
+    }
+
+    public void removeItem(Item item) {
+        items.remove(item);
+        item.setRequest(null);
+    }
 }

@@ -2,9 +2,11 @@
 package ru.practicum.itemrequest;
 
 import lombok.*;
-import ru.practicum.user.UserDto;
+import ru.practicum.dto.ItemDto;
+import ru.practicum.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,4 +19,5 @@ public class ItemRequestDto {
     private String description;
     private UserDto requester;
     private LocalDateTime created;
+    private List<ItemDto> items; // Это поле должно существовать
 }

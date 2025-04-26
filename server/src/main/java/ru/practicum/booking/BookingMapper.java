@@ -3,6 +3,7 @@ package ru.practicum.booking;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import ru.practicum.dto.BookingDto;
 import ru.practicum.item.Item;
 import ru.practicum.item.ItemMapper;
 import ru.practicum.user.User;
@@ -13,11 +14,12 @@ public interface BookingMapper {
 
     @Mapping(target = "itemId", source = "item.id")
     @Mapping(target = "bookerId", source = "booker.id")
+    @Mapping(target = "item", ignore = true)  // We'll handle this manually
     BookingDto toDto(Booking booking);
 
     @Mapping(target = "item", source = "itemId", qualifiedByName = "idToItem")
     @Mapping(target = "booker", source = "bookerId", qualifiedByName = "idToUser")
-    @Mapping(target = "status", expression = "java(ru.practicum.booking.BookingStatus.WAITING)")
+    @Mapping(target = "status", expression = "java(ru.practicum.util.BookingStatus.WAITING)")
     Booking toEntity(BookingDto bookingDto);
 
     // Helper methods for ID conversion
@@ -39,5 +41,15 @@ public interface BookingMapper {
         User user = new User();
         user.setId(userId);
         return user;
+    }
+
+    // Add this method to handle custom mapping
+    default BookingDto mapBookingToDto(Booking booking, ItemMapper itemMapper) {
+        BookingDto dto = toDto(booking);
+        if (booking.getItem() != null) {
+            // Use your ItemMapper to properly map the Item to ItemDto
+            dto.setItem(itemMapper.mapToDto(booking.getItem()));
+        }
+        return dto;
     }
 }

@@ -15,6 +15,12 @@
     <name>ShareIt Server</name>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <!-- Spring Boot Starter Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -73,12 +79,17 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>ru.practicum</groupId>
-            <artifactId>gateway</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <artifactId>shareit-dto</artifactId>
+            <version>${project.version}</version>  <!-- Используйте ту же версию, что и родительский POM -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
