@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.BookingDto;
+import ru.practicum.dto.ItemDto;
+import ru.practicum.dto.UserDto;
 import ru.practicum.util.BookingStatus;
 import ru.practicum.exception.*;
 import ru.practicum.item.Item;
@@ -31,38 +33,59 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto createBooking(BookingDto bookingDto, Long bookerId) {
         log.info("Creating booking for item {} by user {}", bookingDto.getItemId(), bookerId);
 
-        // 1. Find user - throws NotFoundException (404)
-        User booker;
-        try {
-            booker = userRepository.findById(bookerId)
-                    .orElseThrow(() -> new RuntimeException("User not found with id: " + bookerId));
-        } catch (RuntimeException e) {
-            log.error("User lookup failed", e);
-            throw new RuntimeException("User lookup failed", e); // Will result in 500
-        }
+        // 1. Validate and fetch required entities
+        User booker = userRepository.findById(bookerId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + bookerId));
 
-        // 2. Find item - throws ItemNotFoundException (404)
         Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> {
-                    log.error("Item not found with id: {}", bookingDto.getItemId());
-                    return new ItemNotFoundException("Item not found with id: " + bookingDto.getItemId());
-                });
+                .orElseThrow(() -> new ItemNotFoundException("Item not found with id: " + bookingDto.getItemId()));
 
-        // 3. Business validations (throw other exceptions)
+        // 2. Business validations
+        validateBookingCreation(item, bookerId);
+
+        // 3. Create and save booking
+        Booking booking = buildBookingEntity(bookingDto, item, booker);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // 4. Return fully populated DTO
+        return buildBookingResponseDto(savedBooking);
+    }
+
+    private void validateBookingCreation(Item item, Long bookerId) {
         if (!item.getAvailable()) {
             throw new ValidateException("Item is not available for booking");
         }
         if (item.getOwner().getId().equals(bookerId)) {
             throw new ConflictException("Owner cannot book their own item");
         }
+    }
 
-        // 4. Create and save booking
-        Booking booking = bookingMapper.toEntity(bookingDto);
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(BookingStatus.WAITING);
+    private Booking buildBookingEntity(BookingDto bookingDto, Item item, User booker) {
+        return Booking.builder()
+                .start(bookingDto.getStart())
+                .end(bookingDto.getEnd())
+                .item(item)
+                .booker(booker)
+                .status(BookingStatus.WAITING)
+                .build();
+    }
 
-        return bookingMapper.toDto(bookingRepository.save(booking));
+    private BookingDto buildBookingResponseDto(Booking booking) {
+        return BookingDto.builder()
+                .id(booking.getId())
+                .start(booking.getStart())
+                .end(booking.getEnd())
+                .item(ItemDto.builder()
+                        .id(booking.getItem().getId())
+                        .name(booking.getItem().getName())
+                        .build())
+                .booker(UserDto.builder()
+                        .id(booking.getBooker().getId())
+                        .name(booking.getBooker().getName())
+                        .email(booking.getBooker().getEmail())
+                        .build())
+                .status(booking.getStatus())
+                .build();
     }
 
     @Override
