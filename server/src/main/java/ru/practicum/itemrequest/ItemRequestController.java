@@ -1,4 +1,3 @@
-// ItemRequestController.java (Controller - in ru.practicum.request)
 package ru.practicum.itemrequest;
 
 import jakarta.validation.Valid;
@@ -9,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.ItemRequestDto;
+import ru.practicum.dto.ItemRequestResponseDto;
+import ru.practicum.dto.ItemRequestWithItemsDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.util.Constants;
 
@@ -25,11 +26,11 @@ public class ItemRequestController {
     private final ItemRequestMapper itemRequestMapper;
 
     @PostMapping
-    public ResponseEntity<ItemRequestDto> create(@Valid @RequestBody ItemRequestDto itemRequestDto,
-                                                 @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+    public ResponseEntity<ItemRequestResponseDto> create(@Valid @RequestBody ItemRequestDto itemRequestDto,
+                                                         @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("Received POST request to create ItemRequest from user {}: {}", userId, itemRequestDto);
         try {
-            ItemRequestDto createdRequest = itemRequestMapper.toDto(itemRequestService.create(itemRequestMapper.toEntity(itemRequestDto), userId));
+            ItemRequestResponseDto createdRequest = itemRequestMapper.toResponseDto(itemRequestService.create(itemRequestMapper.toEntity(itemRequestDto), userId));
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRequest);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -37,11 +38,11 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<ItemRequestDto> getById(@PathVariable Long requestId,
-                                                  @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+    public ResponseEntity<ItemRequestWithItemsDto> getById(@PathVariable Long requestId,
+                                                           @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("Received GET request to retrieve ItemRequest {} for user {}", requestId, userId);
         try {
-            ItemRequestDto requestDto = itemRequestMapper.toDto(itemRequestService.getById(requestId, userId));
+            ItemRequestWithItemsDto requestDto = itemRequestMapper.toDtoWithItems(itemRequestService.getById(requestId, userId));
             return ResponseEntity.ok(requestDto);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -49,10 +50,10 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemRequestDto>> getAllByUser(@RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+    public ResponseEntity<List<ItemRequestWithItemsDto>> getAllByUser(@RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("Received GET request to retrieve all ItemRequests for user {}", userId);
         try {
-            List<ItemRequestDto> requestDtos = itemRequestMapper.toDtoList(itemRequestService.getAllByUser(userId));
+            List<ItemRequestWithItemsDto> requestDtos = itemRequestMapper.toDtoWithItemsList(itemRequestService.getAllByUser(userId));
             return ResponseEntity.ok(requestDtos);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -60,12 +61,12 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ItemRequestDto>> getAll(@RequestParam(defaultValue = "0") int from,
-                                                       @RequestParam(defaultValue = "10") int size,
-                                                       @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+    public ResponseEntity<List<ItemRequestWithItemsDto>> getAll(@RequestParam(defaultValue = "0") int from,
+                                                                @RequestParam(defaultValue = "10") int size,
+                                                                @RequestHeader(Constants.USER_ID_HEADER) Long userId) {
         log.info("Received GET request to retrieve all ItemRequests pageable for user {}", userId);
         try {
-            List<ItemRequestDto> requestDtos = itemRequestMapper.toDtoList(itemRequestService.getAll(from, size, userId));
+            List<ItemRequestWithItemsDto> requestDtos = itemRequestMapper.toDtoWithItemsList(itemRequestService.getAll(from, size, userId));
             return ResponseEntity.ok(requestDtos);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
