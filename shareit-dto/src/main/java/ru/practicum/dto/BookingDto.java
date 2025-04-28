@@ -24,13 +24,14 @@ public class BookingDto {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime end;
 
-    Long itemId;  // Для создания бронирования
+    // For request only
+    Long itemId;
 
-    ItemDto item;  // Только для ответа
+    Long bookerId;
 
-    UserDto booker;  // Только для ответа
+    // For response only
+    BookingItemDto item;
 
-    Long bookerId;  // Только для ответа
-
-    BookingStatus status;  // Только для ответа
+    UserDto booker;
+    BookingStatus status;
 }

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.BookingDto;
+import ru.practicum.dto.BookingItemDto;
 import ru.practicum.dto.ItemDto;
 import ru.practicum.dto.UserDto;
 import ru.practicum.util.BookingStatus;
@@ -75,7 +76,7 @@ public class BookingServiceImpl implements BookingService {
                 .id(booking.getId())
                 .start(booking.getStart())
                 .end(booking.getEnd())
-                .item(ItemDto.builder()
+                .item(BookingItemDto.builder()  // Changed from ItemDto to BookingItemDto
                         .id(booking.getItem().getId())
                         .name(booking.getItem().getName())
                         .build())
@@ -138,13 +139,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBooking(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new NotFoundException("Booking not found"));
 
+        // Authorization check
         if (!booking.getBooker().getId().equals(userId) &&
                 !booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidateException("Only booker or owner can view booking details");
+            throw new NotFoundException("Booking not found");
         }
 
         return bookingMapper.toDto(booking);

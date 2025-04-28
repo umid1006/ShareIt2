@@ -4,30 +4,27 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import ru.practicum.dto.BookingDto;
+import ru.practicum.dto.BookingItemDto;
 import ru.practicum.item.Item;
-import ru.practicum.item.ItemMapper;
 import ru.practicum.user.User;
 import ru.practicum.user.UserMapper;
 
-@Mapper(componentModel = "spring", uses = {ItemMapper.class, UserMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface BookingMapper {
 
-    @Mapping(target = "itemId", source = "item.id")
-    @Mapping(target = "bookerId", source = "booker.id")
-    @Mapping(target = "item", ignore = true)  // We'll handle this manually
+    @Mapping(target = "item", source = "item", qualifiedByName = "mapItemToBookingItemDto")
+    @Mapping(target = "booker", source = "booker")
+    @Mapping(target = "itemId", source = "item.id")  // Map item ID from entity
     BookingDto toDto(Booking booking);
 
     @Mapping(target = "item", source = "itemId", qualifiedByName = "idToItem")
-    @Mapping(target = "booker", source = "bookerId", qualifiedByName = "idToUser")
-    @Mapping(target = "status", expression = "java(ru.practicum.util.BookingStatus.WAITING)")
+    @Mapping(target = "booker", source = "booker.id", qualifiedByName = "idToUser")  // Changed from bookerId to booker.id
+    @Mapping(target = "status", defaultValue = "WAITING")
     Booking toEntity(BookingDto bookingDto);
 
-    // Helper methods for ID conversion
     @Named("idToItem")
     default Item idToItem(Long itemId) {
-        if (itemId == null) {
-            return null;
-        }
+        if (itemId == null) return null;
         Item item = new Item();
         item.setId(itemId);
         return item;
@@ -35,21 +32,18 @@ public interface BookingMapper {
 
     @Named("idToUser")
     default User idToUser(Long userId) {
-        if (userId == null) {
-            return null;
-        }
+        if (userId == null) return null;
         User user = new User();
         user.setId(userId);
         return user;
     }
 
-    // Add this method to handle custom mapping
-    default BookingDto mapBookingToDto(Booking booking, ItemMapper itemMapper) {
-        BookingDto dto = toDto(booking);
-        if (booking.getItem() != null) {
-            // Use your ItemMapper to properly map the Item to ItemDto
-            dto.setItem(itemMapper.mapToDto(booking.getItem()));
-        }
-        return dto;
+    @Named("mapItemToBookingItemDto")
+    default BookingItemDto mapItemToBookingItemDto(Item item) {
+        if (item == null) return null;
+        return BookingItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .build();
     }
 }

@@ -15,9 +15,10 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface ItemRequestMapper {
 
-    @Mapping(target = "requester", ignore = true)
-    @Mapping(target = "items", ignore = true)
-    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "id", ignore = true)  // ID is auto-generated
+    @Mapping(target = "requester", ignore = true)  // Will be set in service
+    @Mapping(target = "items", ignore = true)  // Will be populated later
+    @Mapping(target = "created", ignore = true)  // Will be set automatically
     ItemRequest toEntity(ItemRequestDto itemRequestDto);
 
     @Mapping(target = "id", source = "id")
