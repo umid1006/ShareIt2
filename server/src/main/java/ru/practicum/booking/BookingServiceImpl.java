@@ -152,22 +152,29 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getBookings(Long userId, String state) {
+        // 1. Validate user exists
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
 
+        // 2. Create sort criteria
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
         List<Booking> bookings;
 
-        try {
-            BookingStatus status = BookingStatus.valueOf(state.toUpperCase());
-            bookings = bookingRepository.findByBookerIdAndStatus(userId, status, sort);
-        } catch (IllegalArgumentException e) {
-            // If state is not a valid BookingStatus, return all bookings
+        // 3. Handle state parameter
+        if ("ALL".equalsIgnoreCase(state)) {
             bookings = bookingRepository.findByBookerId(userId, sort);
+        } else {
+            try {
+                BookingStatus status = BookingStatus.valueOf(state.toUpperCase());
+                bookings = bookingRepository.findByBookerIdAndStatus(userId, status, sort);
+            } catch (IllegalArgumentException e) {
+                throw new ValidateException("Unknown state: " + state);
+            }
         }
 
+        // 4. Map to DTOs using consistent mapper
         return bookings.stream()
-                .map(bookingMapper::toDto)
+                .map(this::buildBookingResponseDto) // Use the same mapper consistently
                 .collect(Collectors.toList());
     }
 
