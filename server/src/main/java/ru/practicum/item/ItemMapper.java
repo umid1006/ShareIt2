@@ -16,6 +16,9 @@ public interface ItemMapper {
 
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToItemRequest")
     @Mapping(target = "owner", source = "ownerId", qualifiedByName = "mapOwnerIdToUser")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "available", source = "available")
     Item mapToModel(ItemDto itemDto);
 
     @Mapping(target = "requestId", source = "request", qualifiedByName = "mapItemRequestToRequestId")

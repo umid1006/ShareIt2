@@ -73,22 +73,25 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional // Add this!
-    public ru.practicum.dto.ItemDto add(ItemDto itemDto, Long ownerId) {
-        // 1. Fetch the User (owner)
+    @Transactional
+    public ItemDto add(ItemDto itemDto, Long ownerId) {
+        // Validate input
+        if (itemDto == null) {
+            throw new IllegalArgumentException("ItemDto cannot be null");
+        }
+
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("User with id " + ownerId + " not found"));
 
-        // 2. Map DTO to entity
         Item item = mapper.mapToModel(itemDto);
+        if (item == null) {
+            throw new IllegalStateException("Failed to map ItemDto to Item");
+        }
 
-        // 3. Set the owner *entity*
+        // Ensure owner is set properly (override the mapped owner if needed)
         item.setOwner(owner);
 
-        // 4. Validate
         validationService.validateItemFields(item);
-
-        // 5. Save (Spring Data JPA handles insert/update)
         Item savedItem = itemRepository.save(item);
         return mapper.mapToDto(savedItem);
     }
