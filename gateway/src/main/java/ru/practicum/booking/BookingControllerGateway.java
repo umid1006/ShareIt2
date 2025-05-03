@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.BookItemRequestDto;
-import ru.practicum.util.BookingState;
+import ru.practicum.util.BookingStatus;
 import ru.practicum.util.Constants;
 
 @RestController
@@ -23,16 +23,16 @@ public class BookingControllerGateway {
     @GetMapping
     public ResponseEntity<Object> getUserBookings(
             @RequestHeader(Constants.USER_ID_HEADER) @Positive Long userId,
-            @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+            @RequestParam(name = "status", defaultValue = "ALL") String statusParam,
             @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
 
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+        BookingStatus status = BookingStatus.from(statusParam)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + statusParam));
 
         log.info("Gateway: Get bookings for user {} (state={}, from={}, size={})",
-                userId, state, from, size);
-        return bookingClient.getBookings(userId, state, from, size);
+                userId, status, from, size);
+        return bookingClient.getBookings(userId, status, from, size);
     }
 
     @PostMapping

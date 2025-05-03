@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import ru.practicum.dto.BookItemRequestDto;
-import ru.practicum.util.BookingState;
 import ru.practicum.client.BaseClient;
+import ru.practicum.util.BookingStatus;
 
 @Slf4j
 @Service
@@ -32,9 +32,9 @@ public class BookingClient extends BaseClient {
         log.info("Server URL: {}", serverUrl); // Добавьте эту строку
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
+    public ResponseEntity<Object> getBookings(long userId, BookingStatus status, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
-                "state", state.name(),
+                "state", status.name(),
                 "from", from,
                 "size", size
         );

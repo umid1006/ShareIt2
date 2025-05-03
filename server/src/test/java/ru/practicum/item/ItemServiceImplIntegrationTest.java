@@ -1,5 +1,6 @@
 package ru.practicum.item;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -8,6 +9,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import ru.practicum.booking.Booking;
 import ru.practicum.booking.BookingMapper;
+import ru.practicum.booking.BookingMapperImpl;
+import ru.practicum.booking.BookingRepository;
+import ru.practicum.user.UserRepository;
 import ru.practicum.util.BookingStatus;
 import ru.practicum.user.User;
 import ru.practicum.validation.ValidationService;
@@ -22,7 +26,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Import({ItemServiceImpl.class, ValidationService.class})
+@Import({ItemServiceImpl.class, ValidationService.class, ItemMapperImpl.class,
+        BookingMapperImpl.class, CommentMapperImpl.class})
 class ItemServiceImplIntegrationTest {
 
     @MockBean
@@ -39,6 +44,32 @@ class ItemServiceImplIntegrationTest {
 
     @Autowired
     private ItemServiceImpl itemService;
+
+    @Autowired
+    private ItemRepository itemRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+
+    @BeforeEach
+    void setUp() {
+        User owner = userRepository.save(new User(null, "Owner", "owner@email.com"));
+        User booker = userRepository.save(new User(null, "Booker", "booker@email.com"));
+
+        Item item1 = itemRepository.save(new Item(null, "Item1", "Desc1", owner, true, null));
+        Item item2 = itemRepository.save(new Item(null, "Item2", "Desc2", owner, true, null));
+
+        LocalDateTime now = LocalDateTime.now();
+        Booking pastBooking = bookingRepository.save(
+                new Booking(null, now.minusDays(2), now.minusDays(1), item1, booker, BookingStatus.APPROVED));
+        Booking futureBooking = bookingRepository.save(
+                new Booking(null, now.plusDays(1), now.plusDays(2), item1, booker, BookingStatus.APPROVED));
+    }
+
 
     private User createTestUser(String name, String email) {
         User user = new User(null, name, email);
