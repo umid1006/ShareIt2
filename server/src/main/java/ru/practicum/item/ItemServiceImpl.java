@@ -40,7 +40,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional // Add this!  Important for write operations
-    public ru.practicum.dto.ItemDto updateInStorage(ItemDto itemDto, Long ownerId, Long itemId) {
+    public ItemDto updateInStorage(ItemDto itemDto, Long ownerId, Long itemId) {
         if (ownerId == null) {
             throw new ValidateException("Для обновления надо передать ID хозяина вещи.");
         }
@@ -93,11 +93,11 @@ public class ItemServiceImpl implements ItemService {
 
         validationService.validateItemFields(item);
         Item savedItem = itemRepository.save(item);
-        return mapper.mapToDto(savedItem);
+        return itemMapper.mapToDto(savedItem);
     }
 
     @Override
-    public List<ru.practicum.dto.ItemDto> getAllItems(Long userId) {
+    public List<ItemDto> getAllItems(Long userId) {
         // Use the repository method to fetch by owner ID
         return itemRepository.findByOwnerId(userId).stream()
                 .map(mapper::mapToDto)
@@ -105,7 +105,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ru.practicum.dto.ItemDto getItemById(Long itemId) {
+    public ItemDto getItemById(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with ID: " + itemId));
 
@@ -129,7 +129,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ru.practicum.dto.ItemDto> searchItemsByText(String text) {
+    public List<ItemDto> searchItemsByText(String text) {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
@@ -141,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ru.practicum.dto.ItemDto> getItemsByOwner(Long ownerId) {
+    public List<ItemDto> getItemsByOwner(Long ownerId) {
         List<Item> items = itemRepository.findByOwnerId(ownerId);
         LocalDateTime now = LocalDateTime.now();
 

@@ -14,20 +14,31 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {CommentMapper.class, BookingMapper.class})
 public interface ItemMapper {
 
+    @Mapping(target = "owner", ignore = true)
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToItemRequest")
-    @Mapping(target = "owner", source = "ownerId", qualifiedByName = "mapOwnerIdToUser")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "description", source = "description")
-    @Mapping(target = "available", source = "available")
-    Item mapToModel(ItemDto itemDto);
+    @Mapping(target = "id", ignore = true)
+    default Item mapToModel(ItemDto itemDto) {
+        if (itemDto == null) {
+            return null;
+        }
 
-    @Mapping(target = "requestId", source = "request", qualifiedByName = "mapItemRequestToRequestId")
+        Item item = new Item();
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+
+        // Owner will be set manually in the service layer
+        // Request is handled by the @Mapping annotation
+
+        return item;
+    }
+
+    @Mapping(target = "requestId", source = "request.id")
     @Mapping(target = "ownerId", source = "owner.id")
     @Mapping(target = "comments", ignore = true)
-    @Mapping(target = "lastBooking", ignore = true)  // Explicitly ignore
-    @Mapping(target = "nextBooking", ignore = true)  // Explicitly ignore
-    ru.practicum.dto.ItemDto mapToDto(Item item);
-
+    @Mapping(target = "lastBooking", ignore = true)
+    @Mapping(target = "nextBooking", ignore = true)
+    ItemDto mapToDto(Item item);
 
     @Named("mapItemRequestToRequestId")
     default Long mapItemRequestToRequestId(ItemRequest request) {
@@ -50,16 +61,13 @@ public interface ItemMapper {
         return user;
     }
 
-    default ru.practicum.dto.ItemDto mapToDtoWithComments(Item item, List<Comment> comments, CommentMapper commentMapper) {
-        ru.practicum.dto.ItemDto dto = mapToDto(item);
-
-        // Only map comments if needed
-        if (comments != null) {
+    default ItemDto mapToDtoWithComments(Item item, List<Comment> comments, CommentMapper commentMapper) {
+        ItemDto dto = mapToDto(item);
+        if (comments != null && commentMapper != null) {
             dto.setComments(comments.stream()
                     .map(commentMapper::mapToDto)
                     .collect(Collectors.toList()));
         }
-
         return dto;
     }
 }
