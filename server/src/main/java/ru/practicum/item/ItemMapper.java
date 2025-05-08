@@ -14,31 +14,20 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {CommentMapper.class, BookingMapper.class})
 public interface ItemMapper {
 
-    @Mapping(target = "owner", ignore = true)
     @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToItemRequest")
-    @Mapping(target = "id", ignore = true)
-    default Item mapToModel(ItemDto itemDto) {
-        if (itemDto == null) {
-            return null;
-        }
+    @Mapping(target = "owner", source = "ownerId", qualifiedByName = "mapOwnerIdToUser")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "available", source = "available")
+    Item mapToModel(ItemDto itemDto);
 
-        Item item = new Item();
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
 
-        // Owner will be set manually in the service layer
-        // Request is handled by the @Mapping annotation
-
-        return item;
-    }
-
-    @Mapping(target = "requestId", source = "request.id")
+    @Mapping(target = "requestId", source = "request", qualifiedByName = "mapItemRequestToRequestId")
     @Mapping(target = "ownerId", source = "owner.id")
     @Mapping(target = "comments", ignore = true)
-    @Mapping(target = "lastBooking", ignore = true)
-    @Mapping(target = "nextBooking", ignore = true)
-    ItemDto mapToDto(Item item);
+    @Mapping(target = "lastBooking", ignore = true)  // Explicitly ignore
+    @Mapping(target = "nextBooking", ignore = true)  // Explicitly ignore
+    ru.practicum.dto.ItemDto mapToDto(Item item);
 
     @Named("mapItemRequestToRequestId")
     default Long mapItemRequestToRequestId(ItemRequest request) {

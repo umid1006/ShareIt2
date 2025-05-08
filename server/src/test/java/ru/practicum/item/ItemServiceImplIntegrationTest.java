@@ -1,5 +1,6 @@
 package ru.practicum.item;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,6 +20,7 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidateException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -89,6 +91,61 @@ class ItemServiceImplIntegrationTest {
 
         assertThrows(NotFoundException.class, () ->
                 itemService.updateInStorage(updateDto, notOwner.getId(), item.getId()));
+    }
+
+    @Test
+    void add_shouldThrowExceptionWhenUserNotFound() {
+        // Подготовка несуществующего ID пользователя
+        Long nonExistentUserId = 999L;
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Test Item");
+        itemDto.setDescription("Test Description");
+        itemDto.setAvailable(true);
+
+        // Проверка исключения
+        assertThrows(NotFoundException.class, () -> {
+            itemService.add(itemDto, nonExistentUserId);
+        });
+    }
+
+    @Test
+    void add_shouldThrowExceptionWhenItemDtoIsNull() {
+        User owner = new User();
+        owner.setName("Test Owner");
+        owner.setEmail("owner@test.com");
+        owner = userRepository.save(owner);
+
+        User finalOwner = owner;
+        assertThrows(IllegalArgumentException.class, () -> {
+            itemService.add(null, finalOwner.getId());
+        });
+    }
+
+    @Test
+    void add_shouldThrowExceptionWhenRequiredFieldsAreMissing() {
+        User owner = new User();
+        owner.setName("Test Owner");
+        owner.setEmail("owner@test.com");
+        owner = userRepository.save(owner);
+
+        // Тест 1: Отсутствует имя
+        ItemDto noNameDto = new ItemDto();
+        noNameDto.setDescription("Test Description");
+        noNameDto.setAvailable(true);
+        User finalOwner = owner;
+        assertThrows(ValidationException.class, () -> {
+            itemService.add(noNameDto, finalOwner.getId());
+        });
+
+        // Тест 2: Отсутствует описание available
+        ItemDto noAvailableDto = new ItemDto();
+        noAvailableDto.setName("Test Item");
+        noAvailableDto.setDescription("Test Description");
+        User finalOwner1 = owner;
+        assertThrows(ValidationException.class, () -> {
+            itemService.add(noAvailableDto, finalOwner1.getId());
+        });
     }
 
     @Test

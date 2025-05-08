@@ -1,6 +1,7 @@
 // ItemServiceImpl.java (With Transactional Annotations)
 package ru.practicum.item;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,10 +76,20 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto add(ItemDto itemDto, Long ownerId) {
-        // Validate input
+        // 1. Input validation
         if (itemDto == null) {
             throw new IllegalArgumentException("ItemDto cannot be null");
         }
+
+        // 2. Validate DTO fields first
+        if (itemDto.getName() == null) {
+            throw new ValidationException("Item name cannot be null");
+        }
+        if (itemDto.getAvailable() == null) {
+            throw new ValidationException("Available status cannot be null");
+        }
+
+        // 3. Then proceed with mapping and other operations
 
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("User with id " + ownerId + " not found"));
