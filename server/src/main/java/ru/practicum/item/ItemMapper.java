@@ -26,7 +26,8 @@ public interface ItemMapper {
     @Mapping(target = "ownerId", source = "owner.id")
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "lastBooking", ignore = true)  // Explicitly ignore
-    @Mapping(target = "nextBooking", ignore = true)  // Explicitly ignore
+    @Mapping(target = "nextBooking", ignore = true)
+        // Explicitly ignore
     ru.practicum.dto.ItemDto mapToDto(Item item);
 
     @Named("mapItemRequestToRequestId")

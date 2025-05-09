@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -84,7 +85,7 @@ public class BaseClient {
 
         ResponseEntity<Object> shareitServerResponse;
         try {
-            if (parameters != null) {
+            if (!CollectionUtils.isEmpty(parameters)) {
                 shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
                 shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class);

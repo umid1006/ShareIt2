@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-@Value
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(force = true)

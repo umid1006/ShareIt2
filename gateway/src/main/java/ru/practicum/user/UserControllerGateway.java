@@ -32,7 +32,7 @@ public class UserControllerGateway {
 
     @PostMapping
     public ResponseEntity<Object> createUser(
-            @RequestHeader(defaultValue = Constants.USER_ID_HEADER, required = false) @Positive Long userId,
+            @RequestHeader(defaultValue = Constants.USER_ID_HEADER) @Positive Long userId,
             @RequestBody @Valid UserDto userDto) {
         log.info("Gateway: Create new user");
         return userClient.createUser(userDto);

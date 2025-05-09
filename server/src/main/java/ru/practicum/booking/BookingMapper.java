@@ -14,11 +14,13 @@ public interface BookingMapper {
 
     @Mapping(target = "item", source = "item", qualifiedByName = "mapItemToBookingItemDto")
     @Mapping(target = "booker", source = "booker")
-    @Mapping(target = "itemId", source = "item.id")  // Map item ID from entity
+    @Mapping(target = "itemId", source = "item.id")
+        // Map item ID from entity
     BookingDto toDto(Booking booking);
 
     @Mapping(target = "item", source = "itemId", qualifiedByName = "idToItem")
-    @Mapping(target = "booker", source = "booker.id", qualifiedByName = "idToUser")  // Changed from bookerId to booker.id
+    @Mapping(target = "booker", source = "booker.id", qualifiedByName = "idToUser")
+    // Changed from bookerId to booker.id
     @Mapping(target = "status", defaultValue = "WAITING")
     Booking toEntity(BookingDto bookingDto);
 
